@@ -78,36 +78,50 @@ public class datamark_db {
 
 	// 19. Hiên thị dữ liệu lên UI
 	public void displayDataMart() throws ClassNotFoundException {
-		String query = "SELECT * FROM datamark_db.DataMart";
-		try (Connection conn = getConnection();
-				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery(query)) {
-			System.out.println("Danh sách dữ liệu trong Data Mart:");
-			while (rs.next()) {
-				String productName = rs.getString("productName");
-				String description = rs.getString("description");
-				String category = rs.getString("category");
-				String brand = rs.getString("brand");
-				String size = rs.getString("size");
-				double originalPrice = rs.getDouble("originalPrice");
-				double discountedPrice = rs.getDouble("discountedPrice");
-				String date = rs.getString("date");
+	    String query = "SELECT * FROM datamark_db.DataMart";
+	    try (Connection conn = getConnection();
+	         Statement stmt = conn.createStatement();
+	         ResultSet rs = stmt.executeQuery(query)) {
 
-				System.out.printf(
-						"Tên sản phẩm: %s, Mô tả: %s, Danh mục: %s, Thương hiệu: %s, Kích thước: %s, Giá gốc: %.2f, Giá khuyến mãi: %.2f, Ngày: %s%n",
-						productName, description, category, brand, size, originalPrice, discountedPrice, date);
-				// 20. Cập nhật trạng thái trong logs "Finsh"
-				ctdb.logToDatabase(latestFileId, "FINSH", "FINSH", "HOÀN TẤT");
-				// 21. Đóng kết nối db Data Mart
-				closeConnection();
-				dwdmx.closeConnection();
-				stdb.closeConnection();
-				ctdb.closeConnection();
-			}
-		} catch (SQLException e) {
-			System.out.println("Lỗi khi truy vấn dữ liệu từ Data Mart: " + e.getMessage());
-			e.printStackTrace();
-		}
+	        // Sử dụng StringBuilder để lưu trữ danh sách kết quả
+	        StringBuilder result = new StringBuilder();
+	        result.append("Danh sách dữ liệu trong Data Mart:\n");
+
+	        while (rs.next()) {
+	            String productName = rs.getString("productName");
+	            String description = rs.getString("description");
+	            String category = rs.getString("category");
+	            String brand = rs.getString("brand");
+	            String size = rs.getString("size");
+	            double originalPrice = rs.getDouble("originalPrice");
+	            double discountedPrice = rs.getDouble("discountedPrice");
+	            String date = rs.getString("date");
+
+	            // Tạo chuỗi cho từng sản phẩm
+	            String productInfo = String.format(
+	                    "Tên sản phẩm: %s, Mô tả: %s, Danh mục: %s, Thương hiệu: %s, Kích thước: %s, Giá gốc: %.2f, Giá khuyến mãi: %.2f, Ngày: %s",
+	                    productName, description, category, brand, size, originalPrice, discountedPrice, date);
+
+	            // Thêm thông tin sản phẩm vào StringBuilder
+	            result.append(productInfo).append("\n");
+	        }
+
+	        // In ra danh sách sản phẩm
+	        System.out.println(result.toString());
+
+	        // Ghi log trạng thái hoàn tất
+	        ctdb.logToDatabase(latestFileId, "FINSH", "FINSH", "HOÀN TẤT");
+
+	    } catch (SQLException e) {
+	        System.out.println("Lỗi khi truy vấn dữ liệu từ Data Mart: " + e.getMessage());
+	        e.printStackTrace();
+	    } finally {
+	        // Đảm bảo đóng kết nối
+	        closeConnection();
+	        dwdmx.closeConnection();
+	        stdb.closeConnection();
+	        ctdb.closeConnection();
+	    }
 	}
 
 	// 21. Đóng kết nối db Data Mart
@@ -121,7 +135,7 @@ public class datamark_db {
 		}
 	}
 
-	public static void main(String[] args) {
-
+	public static void main(String[] args) throws ClassNotFoundException {
+	
 	}
 }
