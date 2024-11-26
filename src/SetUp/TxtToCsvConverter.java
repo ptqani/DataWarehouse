@@ -20,7 +20,7 @@ public class TxtToCsvConverter {
 	public static void convertTxtToCsv(String txtFilePath, String csvFilePath) {
 		File csvFile = new File(csvFilePath);
 
-		// Kiểm tra và xóa file cũ nếu đã tồn tại
+		// Kiểm tra và xóa file cũ nếu đã tồn tại.
 		if (csvFile.exists() && !csvFile.delete()) {
 			System.out.println("Không thể xóa file cũ: " + csvFilePath);
 			return;
