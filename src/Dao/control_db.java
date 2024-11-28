@@ -28,7 +28,7 @@ public class control_db {
         return connection;
     }
 
-    // Lấy đường dẫn file tạm mới nhất
+//     Lấy đường dẫn file tạm mới nhất
     public static String getLatestFilePathTemp() {
         return getLatestFilePath("file_path_temp");
     }

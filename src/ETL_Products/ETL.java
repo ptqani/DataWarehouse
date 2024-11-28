@@ -31,7 +31,7 @@ public class ETL {
             return; 
         }
         System.out.println("Kết nối Control Database thành công");
-        //3.1 Xác Minh path_temp Mới nhất trong Control Database (file_config)
+        //3.1 Xác Minh path Mới nhất trong Control Database (file_config)
         latestFileId = ctdb.getLatestFileId(); // Get latest file ID from control database
         System.out.println(latestFileId);
 
@@ -69,12 +69,13 @@ public class ETL {
         }
         System.out.println("Kết nối database staging thành công");
         //8.1. Truy cập vào file_path của file_config 
-        System.out.println( ctdb.getLatestFilePathTemp());
+        System.out.println( ctdb.getLatestFilePath());
 
         // 9. Đọc file CSV và 10. Lưu dữ liệu
         try {
             System.out.println("Đang tải dữ liệu vào bảng tạm temp_product_daily...");
             // 10.1 Tải dữ liệu vào Staging bảng tạm temp_product_daily
+            
             stdb.loadCsvToTempTable();
             System.out.println("Tải dữ liệu vào bảng tạm thành công");
         } catch (Exception e) {

@@ -15,7 +15,6 @@ import Dao.control_db;
 public class TxtToCsvConverter {
 	static control_db ctdb = new control_db();
 	// Lấy ID mới nhất từ file_config
-	static Integer latestFileId = ctdb.getLatestFileId();
 
 	public static void convertTxtToCsv(String txtFilePath, String csvFilePath) {
 		File csvFile = new File(csvFilePath);
