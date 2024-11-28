@@ -68,6 +68,16 @@ public class HostingerEmail {
 	}
 
 	public static void main(String[] args) {
-		
-	}
+        // Test sending email
+        String recipient = "20130374@st.hcmuaf.edu.vn"; // Change this to the recipient's email
+        String subject = "Test Email from Hostinger"; // Email subject
+        String body = "This is a test email sent from the HostingerEmail class."; // Email body
+
+        boolean result = sendEmail(recipient, subject, body);
+        if (result) {
+            System.out.println("Email đã được gửi thành công!");
+        } else {
+            System.out.println("Gửi email thất bại.");
+        }
+    }
 }

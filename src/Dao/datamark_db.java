@@ -5,13 +5,11 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import SetUp.HostingerEmail;
 
 public class datamark_db {
 	private static final String URL = "jdbc:mysql://localhost:3306/datamark_db";
 	private static final String USER = "root";
 	private static final String PASSWORD = "123456";
-	private static final String email = "20130374@st.hcmuaf.edu.vn";
 	private static Connection connection = null;
 
 	// Khởi tạo control_db để quản lý logging và lấy fileId mới nhất
@@ -28,12 +26,7 @@ public class datamark_db {
 				connection = DriverManager.getConnection(URL, USER, PASSWORD);
 			} catch (SQLException e) {
 				e.printStackTrace();
-				// 17.2 Gửi email thông báo lỗi
-				HostingerEmail.sendEmail(email, "Kết nối Data Mark", "Kết nối thất bại");
-				// đóng kết nối
-				dwdmx.closeConnection();
-				stdb.closeConnection();
-				ctdb.closeConnection();
+				
 				throw e;
 			}
 		}
@@ -65,18 +58,13 @@ public class datamark_db {
 			// Thực thi câu lệnh INSERT để tải dữ liệu
 			stmt.execute(loadDataSql);
 			System.out.println("Dữ liệu đã được tải vào Data Mart thành công.");
-
-			// 18. Cập nhật trạng thái trong logs "Success Loading"
-			ctdb.logToDatabase(latestFileId, "Load", "Success Loading", "Dữ liệu đã được tải lên Data Mart");
 		} catch (SQLException e) {
 			System.out.println("Lỗi khi tải dữ liệu vào Data Mart: " + e.getMessage());
-			// Ghi trạng thái lỗi vào bảng logs nếu tải thất bại
-			ctdb.logToDatabase(latestFileId, "Load", "Failed", "Tải dữ liệu lên Data Mart thất bại");
 			e.printStackTrace();
 		}
 	}
 
-	// 19. Hiên thị dữ liệu lên UI
+	// 19. Hiển thị dữ liệu lên UI
 	public void displayDataMart() throws ClassNotFoundException {
 	    String query = "SELECT * FROM datamark_db.DataMart";
 	    try (Connection conn = getConnection();
@@ -109,18 +97,11 @@ public class datamark_db {
 	        // In ra danh sách sản phẩm
 	        System.out.println(result.toString());
 
-	        // Ghi log trạng thái hoàn tất
-	        ctdb.logToDatabase(latestFileId, "FINSH", "FINSH", "HOÀN TẤT");
-
 	    } catch (SQLException e) {
 	        System.out.println("Lỗi khi truy vấn dữ liệu từ Data Mart: " + e.getMessage());
 	        e.printStackTrace();
 	    } finally {
-	        // Đảm bảo đóng kết nối
-	        closeConnection();
-	        dwdmx.closeConnection();
-	        stdb.closeConnection();
-	        ctdb.closeConnection();
+
 	    }
 	}
 

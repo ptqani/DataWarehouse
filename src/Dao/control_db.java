@@ -5,31 +5,30 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import SetUp.HostingerEmail;
 
 public class control_db {
     private static final String URL = "jdbc:mysql://localhost:3306/control_db";
     private static final String USER = "root";
     private static final String PASSWORD = "123456";
     private static Connection connection = null;
-    private static final String email = "20130374@st.hcmuaf.edu.vn";
 
     // Phương thức lấy kết nối tới Control Database
-    public static Connection getConnection() throws ClassNotFoundException, SQLException {
-        if (connection == null || connection.isClosed()) {
-            try {
+    public static Connection getConnection() {
+        try {
+            if (connection == null || connection.isClosed()) {
+                // Đảm bảo driver được tải
                 Class.forName("com.mysql.cj.jdbc.Driver");
+                // Kết nối cơ sở dữ liệu
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            } catch (SQLException e) {
-            	//3.2 Gửi email thông báo lỗi
-                HostingerEmail.sendEmail(email, "Kết nối Control Database", "Kết nối thất bại");
-                throw e;
             }
+        } catch (ClassNotFoundException | SQLException e) {
+            // Ghi thông báo lỗi mà không in ra stack trace
+            System.err.println("Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());
         }
         return connection;
     }
-    //3.1 Xác Minh path Mới nhất trong Control Database(file_config)
-    // Lấy đường dẫn file tạm mới nhất
+
+//     Lấy đường dẫn file tạm mới nhất
     public static String getLatestFilePathTemp() {
         return getLatestFilePath("file_path_temp");
     }
@@ -46,8 +45,9 @@ public class control_db {
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
             return rs.next() ? rs.getString(column) : null;
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            // Ghi thông báo lỗi mà không in ra stack trace
+            System.err.println("Lỗi khi thực thi truy vấn để lấy đường dẫn file mới nhất: " + e.getMessage());
             return null;
         }
     }
@@ -60,7 +60,8 @@ public class control_db {
              ResultSet rs = stmt.executeQuery()) {
             return rs.next() ? rs.getInt("latest_id") : null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            // Ghi thông báo lỗi mà không in ra stack trace
+            System.err.println("Lỗi khi thực thi truy vấn để lấy ID file mới nhất: " + e.getMessage());
             return null;
         }
     }
@@ -75,25 +76,29 @@ public class control_db {
             stmt.setString(3, status);
             stmt.setString(4, logMessage);
             int rowsAffected = stmt.executeUpdate();
-            System.out.println(rowsAffected > 0 ? "Ghi log thành công!" : "Không có dòng nào được ghi.");
+            // Nếu không có dòng nào bị ghi, thông báo lỗi
+            if (rowsAffected <= 0) {
+                System.err.println("Không có dòng nào được ghi vào bảng logs.");
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            // Ghi thông báo lỗi mà không in ra stack trace
+            System.err.println("Lỗi khi ghi log vào cơ sở dữ liệu: " + e.getMessage());
         }
     }
 
-    //24. Đóng kết nối Control Database
+    // Đóng kết nối Control Database
     public static void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            // Ghi thông báo lỗi mà không in ra stack trace
+            System.err.println("Lỗi khi đóng kết nối cơ sở dữ liệu: " + e.getMessage());
         }
     }
 
-
     public static void main(String[] args) {
-      
-}
+        // Phương thức main có thể để trống hoặc bạn có thể thêm các trường hợp thử nghiệm ở đây
+    }
 }
