@@ -3,9 +3,12 @@ package SetUp;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import Dao.control_db;
 
@@ -18,17 +21,20 @@ public class TxtToCsvConverter {
 		File csvFile = new File(csvFilePath);
 
 		// Kiểm tra và xóa file cũ nếu đã tồn tại
-		if (csvFile.exists()) {
-			if (csvFile.delete()) {
-				System.out.println("File cũ đã bị xóa: " + csvFilePath);
-			} else {
-				System.out.println("Không thể xóa file cũ: " + csvFilePath);
-				return; // Dừng quá trình nếu không thể xóa
-			}
+		if (csvFile.exists() && !csvFile.delete()) {
+			System.out.println("Không thể xóa file cũ: " + csvFilePath);
+			return;
 		}
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(txtFilePath));
-				BufferedWriter writer = new BufferedWriter(new FileWriter(csvFilePath))) {
+		try (
+				// Đọc file TXT với mã hóa UTF-8
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(new FileInputStream(txtFilePath), StandardCharsets.UTF_8));
+				// Ghi file CSV với mã hóa UTF-8 và thêm BOM
+				BufferedWriter writer = new BufferedWriter(
+						new OutputStreamWriter(new FileOutputStream(csvFilePath), StandardCharsets.UTF_8))) {
+			// Thêm BOM vào đầu file để Excel nhận diện UTF-8
+			writer.write("\uFEFF");
 
 			// Ghi tiêu đề vào CSV
 			writer.write(
@@ -36,32 +42,36 @@ public class TxtToCsvConverter {
 			writer.newLine();
 
 			String line;
+			boolean isFirstLine = true;
 			while ((line = reader.readLine()) != null) {
 				line = line.trim();
 
 				// Kiểm tra nếu dòng không rỗng
 				if (!line.isEmpty()) {
-					// Ghi trực tiếp dòng vào file CSV
+					if (isFirstLine) {
+						// Bỏ qua dòng tiêu đề đầu tiên trong file txt
+						isFirstLine = false;
+						continue;
+					}
+
 					writer.write(line);
 					writer.newLine();
 				}
 			}
 
 			System.out.println("Chuyển đổi thành công từ .txt sang .csv");
-			//6. Cập nhật trạng thái trong logs "Success"
-			ctdb.logToDatabase(latestFileId, "Save", "Success", "Lưu dữ liệu vào file products.csv thành công");
+
 		} catch (IOException e) {
-			//5.2 Ghi vào bảng logs với trạng thái "Failed"
-			// Ghi log với ID mới nhất
-			ctdb.logToDatabase(latestFileId, "Save", "Failed", "Lưu dữ liệu vào file products.csv thất bại");
-			ctdb.closeConnection();
+			System.out.println("Chuyển đổi thành công từ .txt sang .csv thất bại");
 			e.printStackTrace();
 		}
 	}
 
 	public static void main(String[] args) {
-		String txtFilePath = "D:\\DW\\text1.txt"; // Đường dẫn tới file .txt
-		String csvFilePath = "D:\\DW\\text2.csv"; // Đường dẫn tới file .csv đầu ra
+		String txtFilePath = "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\products.txt"; // Đường dẫn tới file
+																								// .txt
+		String csvFilePath = "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\products.csv"; // Đường dẫn tới file
+																								// .csv đầu ra
 		convertTxtToCsv(txtFilePath, csvFilePath);
 	}
 }
